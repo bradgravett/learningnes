@@ -1,6 +1,9 @@
 #! /usr/bin/bash
+echo "compiling .o file..."
 ca65 $1".asm"
-echo "compiled .o file"
+echo ".o file ok"
+echo "compiling .nes file..."
 ld65 $1".o" -t nes -o $1".nes"
-echo "compiled .nes file"
+echo ".nes file ok"
+echo "running emulator..."
 /c/cc65/fceux/fceux.exe $1".nes"

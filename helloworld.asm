@@ -3,37 +3,47 @@
 
 .segment "CODE"
 .proc irq_handler
-  RTI
+    RTI
 .endproc
 
 .proc nmi_handler
-  RTI
+    RTI
 .endproc
 
 .proc reset_handler
-  SEI
-  CLD
-  LDX #$00
-  STX $2000
-  STX $2001
+    SEI
+    CLD
+    LDX #$00
+    STX $2000
+    STX $2001
 vblankwait:
-  BIT $2002
-  BPL vblankwait
-  JMP main
+    BIT $2002
+    BPL vblankwait
+    JMP main
 .endproc
 
 .proc main
-  LDX $2002
-  LDX #$3f
-  STX $2006
-  LDX #$00
-  STX $2006
-  LDA #$29
-  STA $2007
-  LDA #%00011110
-  STA $2001
+    LDX $2002
+    LDX #$3f
+    STX $2006
+    LDX #$00
+    STX $2006
+    LDA #$25
+    STA $2007
+    LDA #%00011110
+    STA $2001
 forever:
-  JMP forever
+    NOP
+    NOP
+    NOP
+    NOP
+    NOP
+    NOP
+    NOP
+    NOP
+    ROL A
+    STA $2007
+    JMP forever
 .endproc
 
 .segment "VECTORS"
