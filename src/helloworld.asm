@@ -1,4 +1,4 @@
-.include "constants.inc"
+.include "conSTAnts.inc"
 .include "header.inc"
 
 .segment "CODE"
@@ -7,6 +7,10 @@
 .endproc
 
 .proc nmi_handler
+    LDA #$00
+    STA OAMADDR
+    LDA #$02
+    STA OAMDMA
     RTI
 .endproc
 
@@ -14,6 +18,7 @@
 
 .export main
 .proc main
+    ; writing a palette
     LDX PPUSTATUS
     LDX #$3f
     STX PPUADDR
@@ -21,19 +26,32 @@
     STX PPUADDR
     LDA #$29
     STA PPUDATA
-    LDA #%00011110
+    LDA #$19
+    STA PPUDATA
+    LDA #$09
+    STA PPUDATA
+    LDA #$0f
+    STA PPUDATA
+
+    ; writing sprite data
+    LDA #$70
+    STA $0200 ; y-coordinate of first sprite
+    LDA #$05
+    STA $0201 ; tile number of first sprite
+    LDA #$00
+    STA $0202 ; attributes of first sprite
+    LDA #$80
+    STA $0203 ; x-coordinate of first sprite
+
+vblankwait:
+    BIT PPUSTATUS
+    BPL vblankwait
+
+    LDA #%10010000 ; turn on NMI, using sprites in the first pattern table
+    STA PPUCTRL
+    LDA #%00011110 ; turn on screen
     STA PPUMASK
 forever:
-    NOP
-    NOP
-    NOP
-    NOP
-    NOP
-    NOP
-    NOP
-    NOP
-    ROL A
-    STA $2007
     JMP forever
 .endproc
 
@@ -41,4 +59,4 @@ forever:
 .addr nmi_handler, reset_handler, irq_handler
 
 .segment "CHR"
-.res 8192
+.incbin "graphics/graphics.chr"
