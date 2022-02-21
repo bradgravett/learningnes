@@ -1,4 +1,4 @@
-.include "conSTAnts.inc"
+.include "constants.inc"
 .include "header.inc"
 
 .segment "CODE"
@@ -24,24 +24,22 @@
     STX PPUADDR
     LDX #$00
     STX PPUADDR
-    LDA #$29
-    STA PPUDATA
-    LDA #$19
-    STA PPUDATA
-    LDA #$09
-    STA PPUDATA
-    LDA #$0f
-    STA PPUDATA
+    load_palettes:
+        LDA palettes,X
+        STA PPUDATA
+        INX
+        CPX #$04
+        BNE load_palettes
 
     ; writing sprite data
-    LDA #$70
-    STA $0200 ; y-coordinate of first sprite
-    LDA #$05
-    STA $0201 ; tile number of first sprite
-    LDA #$00
-    STA $0202 ; attributes of first sprite
-    LDA #$80
-    STA $0203 ; x-coordinate of first sprite
+    LDX #$70
+    load_sprites:
+        LDA sprites,X
+        STA $0200,X
+        INX
+        CPX
+        BNE load_sprites
+
 
 vblankwait:
     BIT PPUSTATUS
@@ -51,12 +49,19 @@ vblankwait:
     STA PPUCTRL
     LDA #%00011110 ; turn on screen
     STA PPUMASK
-forever:
-    JMP forever
+    forever:
+        JMP forever
 .endproc
 
 .segment "VECTORS"
 .addr nmi_handler, reset_handler, irq_handler
+
+
+.segment "RODATA"
+    palettes:
+        .byte $29, $19, $09, $0f
+    sprites:
+        .byte $70, $05, $00, $80
 
 .segment "CHR"
 .incbin "graphics/graphics.chr"
